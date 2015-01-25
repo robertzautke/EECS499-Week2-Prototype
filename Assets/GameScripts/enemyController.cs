@@ -3,8 +3,14 @@ using System.Collections;
 
 public class enemyController : MonoBehaviour {
 
+    public int health = 3;
+
 	public GameObject player;
-	 
+
+    public Sprite face_smile;
+    public Sprite face_OK;
+    public Sprite face_frown;
+
 	Vector3 position;
 
 	public float movementVelocity = 3f;
@@ -41,9 +47,6 @@ public class enemyController : MonoBehaviour {
 		{ 
 			Vector3 heading = player.transform.position - this.transform.position;
 			Vector3 direction = heading / distance;
-
-			Debug.Log(direction.x);
-			Debug.Log(direction.y);
 
 			if (position == lastposition)
 			{
@@ -182,5 +185,27 @@ public class enemyController : MonoBehaviour {
 			canJump = true;
 			this.GetComponent<Rigidbody2D>().gravityScale = groundGravity;
 		}
+
+
+        else if (other.gameObject.tag == "Player")
+        {
+            health--;
+
+            if (health <= 2)
+            {
+                this.gameObject.GetComponent<SpriteRenderer>().sprite = face_OK;
+            }
+
+            if (health <= 1)
+            {
+                this.gameObject.GetComponent<SpriteRenderer>().sprite = face_frown;
+            }
+
+            if (health <= 0)
+            {
+                //health = 3;
+                Destroy(this.gameObject);
+            }
+        }
 	}
 }

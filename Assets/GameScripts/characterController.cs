@@ -4,8 +4,12 @@ using System.Collections;
 public class characterController : MonoBehaviour {
 
 	public GameObject currentLevelController;
-	
-	Vector3 playerPosition;
+    public int health = 6;
+	//Vector3 playerPosition;
+
+    public Sprite face_smile;
+    public Sprite face_OK;
+    public Sprite face_frown;
 
 	public float movementVelocity = 3f;
 	public bool canJump = true;
@@ -26,7 +30,7 @@ public class characterController : MonoBehaviour {
 	void Update () 
 	{
 
-		playerPosition = this.gameObject.transform.position;
+		//playerPosition = this.gameObject.transform.position;
 
 /////////////// Movement Physics/Controls ////////////////////////////////////////////
 
@@ -138,5 +142,26 @@ public class characterController : MonoBehaviour {
 			canJump = true;
 			this.GetComponent<Rigidbody2D>().gravityScale = groundGravity;
 		}
+
+        else if (other.gameObject.tag == "Enemy")
+        {
+            health--;
+
+            if (health <= 4)
+            {
+                this.gameObject.GetComponent<SpriteRenderer>().sprite = face_OK;
+            }
+
+            if (health <= 2)
+            {
+                this.gameObject.GetComponent<SpriteRenderer>().sprite = face_frown;
+            }
+
+            if (health <= 0)
+            {
+                health = 6;
+                Application.LoadLevel("Level1");
+            }
+        }
 	}
 }

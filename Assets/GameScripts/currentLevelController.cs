@@ -8,7 +8,7 @@ public class currentLevelController : MonoBehaviour {
 
 	public void nextLevel()
 	{
-		if (currentLevel < levels.Length) 
+		if (currentLevel < levels.Length - 1) 
 		{
 			levels[currentLevel].SetActive(false);
 			currentLevel++;
@@ -26,4 +26,12 @@ public class currentLevelController : MonoBehaviour {
 			levels[currentLevel].SetActive(true);
 		}
 	}
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.LoadLevel("GameMenu");
+        }
+    }
 }
