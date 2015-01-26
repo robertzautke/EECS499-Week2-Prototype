@@ -35,6 +35,11 @@ public class enemyController : MonoBehaviour {
 	public bool S = false;
 	public bool D = false;
 
+	void Start()
+	{
+		player = GameObject.Find("Box(Gravity)Sprite");
+	}
+
 	void Update()
 	{
 		/////////////// Check Movement Conditions ////////////////////////////////////////////

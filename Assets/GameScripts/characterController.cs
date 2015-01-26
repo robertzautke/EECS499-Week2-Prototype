@@ -11,6 +11,10 @@ public class characterController : MonoBehaviour {
     public Sprite face_OK;
     public Sprite face_frown;
 
+	public Sprite face_smile_Stars;
+	public Sprite face_OK_Stars;
+	public Sprite face_frown_Stars;
+
 	public float movementVelocity = 3f;
 	public bool canJump = true;
 	public int airTime = 0;
@@ -26,6 +30,7 @@ public class characterController : MonoBehaviour {
 	public int temp_briefGravityTurnOn = 40;
 	public int briefGravityTurnOn = 0;
 
+	private int starTime;
 
 	void Update () 
 	{
@@ -122,6 +127,40 @@ public class characterController : MonoBehaviour {
 			this.GetComponent<Rigidbody2D>().gravityScale = airGravity;
 		}
 
+/////////////////////// Character Face Handler ///////////////////////////////
+
+		if (this.rigidbody2D.angularVelocity > 2000)
+		{
+			starTime = 100;
+		}
+		if(starTime > 0)
+		{ 
+			starTime--;
+		}
+		if(this.GetComponent<SpriteRenderer>().sprite == face_smile && starTime > 0)
+		{ 
+			this.GetComponent<SpriteRenderer>().sprite = face_smile_Stars;
+		}
+		else if (this.GetComponent<SpriteRenderer>().sprite == face_smile_Stars && starTime <= 0)
+		{
+			this.GetComponent<SpriteRenderer>().sprite = face_smile;
+		}
+		else if (this.GetComponent<SpriteRenderer>().sprite == face_OK && starTime > 0)
+		{
+			this.GetComponent<SpriteRenderer>().sprite = face_OK_Stars;
+		}
+		else if (this.GetComponent<SpriteRenderer>().sprite == face_OK_Stars && starTime <= 0)
+		{
+			this.GetComponent<SpriteRenderer>().sprite = face_OK;
+		}
+		else if (this.GetComponent<SpriteRenderer>().sprite == face_frown && starTime > 0)
+		{
+			this.GetComponent<SpriteRenderer>().sprite = face_frown_Stars;
+		}
+		else if (this.GetComponent<SpriteRenderer>().sprite == face_frown_Stars && starTime <= 0)
+		{
+			this.GetComponent<SpriteRenderer>().sprite = face_frown;
+		}
 //////////////////// Level Controls /////////////////////////////////////////
 
 		if(Input.GetKeyDown(KeyCode.UpArrow))
@@ -160,7 +199,7 @@ public class characterController : MonoBehaviour {
             if (health <= 0)
             {
                 health = 6;
-                Application.LoadLevel("Level1");
+                Application.LoadLevel(currentLevelController.GetComponent<currentLevelController>().currentApplicationLevelName);
             }
         }
 	}

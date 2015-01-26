@@ -3,6 +3,7 @@ using System.Collections;
 
 public class currentLevelController : MonoBehaviour {
 
+	public string currentApplicationLevelName;
 	public int currentLevel = 0;
 	public GameObject[] levels;
 
