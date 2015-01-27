@@ -31,6 +31,7 @@ public class characterController : MonoBehaviour {
 	public int briefGravityTurnOn = 0;
 
 	private int starTime;
+	public float angularVelocity;
 
 	void Update () 
 	{
@@ -127,9 +128,10 @@ public class characterController : MonoBehaviour {
 			this.GetComponent<Rigidbody2D>().gravityScale = airGravity;
 		}
 
-/////////////////////// Character Face Handler ///////////////////////////////
+/////////////////////// Character Face Handler and Attack Handling ///////////////////////////////
 
-		if (this.rigidbody2D.angularVelocity > 2000)
+		angularVelocity = this.rigidbody2D.angularVelocity;
+		if (Mathf.Abs(this.rigidbody2D.angularVelocity) > 2000)
 		{
 			starTime = 100;
 		}
@@ -140,26 +142,56 @@ public class characterController : MonoBehaviour {
 		if(this.GetComponent<SpriteRenderer>().sprite == face_smile && starTime > 0)
 		{ 
 			this.GetComponent<SpriteRenderer>().sprite = face_smile_Stars;
+			int children = this.transform.childCount;
+			for(int i = 0; i < children; i++)
+			{ 
+				this.transform.GetChild(i).gameObject.SetActive(true);
+			}
 		}
 		else if (this.GetComponent<SpriteRenderer>().sprite == face_smile_Stars && starTime <= 0)
 		{
 			this.GetComponent<SpriteRenderer>().sprite = face_smile;
+			int children = this.transform.childCount;
+			for (int i = 0; i < children; i++)
+			{
+				this.transform.GetChild(i).gameObject.SetActive(false);
+			}
 		}
 		else if (this.GetComponent<SpriteRenderer>().sprite == face_OK && starTime > 0)
 		{
 			this.GetComponent<SpriteRenderer>().sprite = face_OK_Stars;
+			int children = this.transform.childCount;
+			for (int i = 0; i < children; i++)
+			{
+				this.transform.GetChild(i).gameObject.SetActive(true);
+			}
 		}
 		else if (this.GetComponent<SpriteRenderer>().sprite == face_OK_Stars && starTime <= 0)
 		{
 			this.GetComponent<SpriteRenderer>().sprite = face_OK;
+			int children = this.transform.childCount;
+			for (int i = 0; i < children; i++)
+			{
+				this.transform.GetChild(i).gameObject.SetActive(false);
+			}
 		}
 		else if (this.GetComponent<SpriteRenderer>().sprite == face_frown && starTime > 0)
 		{
 			this.GetComponent<SpriteRenderer>().sprite = face_frown_Stars;
+			int children = this.transform.childCount;
+			for (int i = 0; i < children; i++)
+			{
+				this.transform.GetChild(i).gameObject.SetActive(true);
+			}
 		}
 		else if (this.GetComponent<SpriteRenderer>().sprite == face_frown_Stars && starTime <= 0)
 		{
 			this.GetComponent<SpriteRenderer>().sprite = face_frown;
+			int children = this.transform.childCount;
+			for (int i = 0; i < children; i++)
+			{
+				this.transform.GetChild(i).gameObject.SetActive(false);
+			}
 		}
 //////////////////// Level Controls /////////////////////////////////////////
 
@@ -184,6 +216,14 @@ public class characterController : MonoBehaviour {
 
         else if (other.gameObject.tag == "Enemy")
         {
+			if(other.gameObject.GetComponent<enemyController_Triangle >() != null)
+			{
+				health -= 3;
+				//Application.LoadLevel(currentLevelController.GetComponent<currentLevelController>().currentApplicationLevelName);
+			}
+			canJump = true;
+			this.GetComponent<Rigidbody2D>().gravityScale = groundGravity;
+
             health--;
 
             if (health <= 4)

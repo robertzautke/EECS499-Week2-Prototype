@@ -6,6 +6,7 @@ public class enemyController : MonoBehaviour {
     public int health = 3;
 
 	public GameObject player;
+	public GameObject spawner;
 
     public Sprite face_smile;
     public Sprite face_OK;
@@ -35,9 +36,11 @@ public class enemyController : MonoBehaviour {
 	public bool S = false;
 	public bool D = false;
 
+	public float attackDistance = 8.0f;
+
 	void Start()
 	{
-		player = GameObject.Find("Box(Gravity)Sprite");
+		player = GameObject.Find("Box(Sprite)Player");
 	}
 
 	void Update()
@@ -48,7 +51,7 @@ public class enemyController : MonoBehaviour {
 
 		float distance = Vector3.Distance(player.transform.position, this.transform.position);
 
-		if(distance < 8.0f)
+		if(distance < attackDistance)
 		{ 
 			Vector3 heading = player.transform.position - this.transform.position;
 			Vector3 direction = heading / distance;
@@ -209,8 +212,24 @@ public class enemyController : MonoBehaviour {
             if (health <= 0)
             {
                 //health = 3;
+				if(spawner != null)
+				{ 
+					spawner.GetComponent<enemySpawner>().currentNumberOfEnemies--;
+				}
                 Destroy(this.gameObject);
             }
         }
+	}
+
+	void OnTriggerEnter2D(Collider2D other)
+	{ 
+		if(other.gameObject.tag == "PlayerAttack")
+		{
+			if (spawner != null)
+			{
+				spawner.GetComponent<enemySpawner>().currentNumberOfEnemies--;
+			}
+			Destroy(this.gameObject);
+		}
 	}
 }

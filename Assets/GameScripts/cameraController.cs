@@ -37,7 +37,7 @@ public class cameraController : MonoBehaviour {
 		}
 		else
 		{ 
-			Player = GameObject.Find("Box(Gravity)Sprite");
+			Player = GameObject.Find("Box(Sprite)Player");
 
 		}
 	}

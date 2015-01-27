@@ -8,7 +8,7 @@ public class enemySpawner : MonoBehaviour {
 	private List<Object> spawnedEnemies = new List<Object>();
 
 	public int numberOfEnemies = 1;
-	private int currentNumberOfEnemies = 0;
+	public int currentNumberOfEnemies = 0;
 
 	void Start () {
 	
@@ -16,19 +16,23 @@ public class enemySpawner : MonoBehaviour {
 	void Update () {
 		if(currentNumberOfEnemies < numberOfEnemies)
 		{ 
-			
-			spawnedEnemies.Add(Object.Instantiate(enemyType, this.transform.position, this.transform.rotation));
+			GameObject newEnemy = (GameObject)Object.Instantiate(enemyType, this.transform.position, this.transform.rotation);
+			if(newEnemy.GetComponent<enemyController>() != null)
+				newEnemy.GetComponent<enemyController>().spawner = this.gameObject;
+			else if(newEnemy.GetComponent<enemyController_Triangle>() != null)
+				newEnemy.GetComponent<enemyController_Triangle>().spawner = this.gameObject;				
+			//spawnedEnemies.Add(Object.Instantiate(enemyType, this.transform.position, this.transform.rotation));
 			currentNumberOfEnemies++;
 
 		}
 
-		foreach(Object O in spawnedEnemies)
-		{
-			if(O == null)
-			{ 
-				spawnedEnemies.Remove(O);
-				currentNumberOfEnemies--;
-			}
-		}
+		//foreach(Object O in spawnedEnemies)
+		//{
+		//	if(O == null)
+		//	{ 
+		//		spawnedEnemies.Remove(O);
+		//		currentNumberOfEnemies--;
+		//	}
+		//}
 	}
 }
