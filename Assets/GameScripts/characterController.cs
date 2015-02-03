@@ -42,14 +42,17 @@ public class characterController : MonoBehaviour {
 
     // Values to set:
 	public float comfortZone = 1000000.0f;
-	public float minSwipeDist = 1.0f;
+	public float minSwipeDist = 2 * ((float)Screen.height / 3.0f);
 	public float maxSwipeTime = 1.0f;
  
     private float startTime;
     private Vector2 startPos;
     private bool couldBeSwipeUpDown;
 	private bool couldBeSwipeLeftRight;
-   
+	
+	public int swipeTimer = 6;
+	private int tempSwipeTimer = 6;
+
     public enum SwipeDirection {
         None,
         Up,
@@ -61,17 +64,34 @@ public class characterController : MonoBehaviour {
 	public SwipeDirection lastSwipe = characterController.SwipeDirection.None;
 	public float lastSwipeTime;
 
+	Vector2 mouseInit;
+	Vector2 mouseFinal;
+	float distance;
 //////////////////////////////////////////////////////////////////////////////////////
 
 	void Update () 
 	{
-
+		//Debug.Log((float)Screen.height);
 /////////////// TouchScreen Handler //////////////////////////////////////////////////
+
+		//if (Input.GetMouseButtonDown(0))
+		//{
+		//	mouseInit = Input.mousePosition;
+		//}
+		//if (Input.GetMouseButtonUp(0))
+		//{
+		//	mouseFinal = Input.mousePosition;
+		//	distance = mouseFinal.y - mouseInit.y;
+		//	Debug.Log(distance);
+		//	if ((mouseFinal.y - mouseInit.y) > minSwipeDist)
+		//		W = true;
+
+		//}
 
         if (Input.touchCount > 0)
         {
             Touch touch = Input.touches[0];
-       
+			
             switch (touch.phase)
             {
                 case TouchPhase.Began:
@@ -81,104 +101,128 @@ public class characterController : MonoBehaviour {
 					couldBeSwipeLeftRight = true;
                     startPos = touch.position;
                     startTime = Time.time;
+					tempSwipeTimer = swipeTimer;
                     break;
-               
                 case TouchPhase.Moved:
 
 					float swipeValue = Mathf.Sign(touch.position.y - startPos.y);
-					if (swipeValue > 0)
-					{
-						lastSwipe = characterController.SwipeDirection.Up;
-						W = true;
-						//force = 19.0f * (Mathf.Abs(touch.position.y - startPos.y) / (float)Screen.height);
 
-					}
-					else if (swipeValue < 0)
+					if (tempSwipeTimer > 0)
 					{
-						lastSwipe = characterController.SwipeDirection.Down;
-						S = true;
+						if (swipeValue > 0)
+						{
+							if ((touch.position.y - startPos.y) > minSwipeDist)
+							{
+								lastSwipe = characterController.SwipeDirection.Up;
+								W = true;
+								//force = 19.0f * (Mathf.Abs(touch.position.y - startPos.y) / (float)Screen.height);
+							}
+
+						}
+						else if (swipeValue < 0)
+						{
+							lastSwipe = characterController.SwipeDirection.Down;
+							S = true;
+						}
+
+						swipeValue = Mathf.Sign(touch.position.x - startPos.x);
+
+						if (swipeValue > 0)
+						{
+							lastSwipe = characterController.SwipeDirection.Right;
+							D = true;
+							if(canJump)
+							{
+								movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
+							}
+							else
+							{
+								movementVelocity = 10.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
+							}
+							
+						}
+						else if (swipeValue < 0)
+						{
+							lastSwipe = characterController.SwipeDirection.Left;
+							A = true;
+							if (canJump)
+							{
+								movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
+							}
+							else
+							{
+								movementVelocity = 10.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
+							}
+						}
+						tempSwipeTimer--;
 					}
 
-					swipeValue = Mathf.Sign(touch.position.x - startPos.x);
+					//if (Mathf.Abs(touch.position.x - startPos.x) > comfortZone)
+					//{
+					//	Debug.Log("Not an UpDown swipe. Swipe strayed " + (int)Mathf.Abs(touch.position.x - startPos.x) +
+					//			  "px which is " + (int)(Mathf.Abs(touch.position.x - startPos.x) - comfortZone) +
+					//			  "px outside the comfort zone.");
+					//	couldBeSwipeUpDown = false;
+					//}
 
-					if (swipeValue > 0)
-					{
-						lastSwipe = characterController.SwipeDirection.Right;
-						D = true;
-						movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
-					}
-					else if (swipeValue < 0)
-					{
-						lastSwipe = characterController.SwipeDirection.Left;
-						A = true;
-						movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
-					}
-
-                    if (Mathf.Abs(touch.position.x - startPos.x) > comfortZone)
-                    {
-                        Debug.Log("Not an UpDown swipe. Swipe strayed " + (int)Mathf.Abs(touch.position.x - startPos.x) +
-                                  "px which is " + (int)(Mathf.Abs(touch.position.x - startPos.x) - comfortZone) +
-                                  "px outside the comfort zone.");
-                        couldBeSwipeUpDown = false;
-                    }
-
-					if (Mathf.Abs(touch.position.y - startPos.y) > comfortZone)
-					{
-						Debug.Log("Not a LeftRight swipe. Swipe strayed " + (int)Mathf.Abs(touch.position.y - startPos.y) +
-								  "px which is " + (int)(Mathf.Abs(touch.position.x - startPos.x) - comfortZone) +
-								  "px outside the comfort zone.");
-						couldBeSwipeLeftRight = false;
-					}
+					//if (Mathf.Abs(touch.position.y - startPos.y) > comfortZone)
+					//{
+					//	Debug.Log("Not a LeftRight swipe. Swipe strayed " + (int)Mathf.Abs(touch.position.y - startPos.y) +
+					//			  "px which is " + (int)(Mathf.Abs(touch.position.x - startPos.x) - comfortZone) +
+					//			  "px outside the comfort zone.");
+					//	couldBeSwipeLeftRight = false;
+					//}
                     break;
                 case TouchPhase.Ended:
                    // if (couldBeSwipeUpDown)
                    // {
-                        float swipeTime = Time.time - startTime;
-                        float swipeDist = (new Vector3(0, touch.position.y, 0) - new Vector3(0, startPos.y, 0)).magnitude;
-                   
-                        if ((swipeTime < maxSwipeTime) && (swipeDist > minSwipeDist))
-                        {
-                            swipeValue = Mathf.Sign(touch.position.y - startPos.y);
-                       
-                            if (swipeValue > 0)
-							{
-								lastSwipe = characterController.SwipeDirection.Up;
-								W = true;
-								force = 19.0f * (Mathf.Abs(touch.position.y - startPos.y) / (float)Screen.height);
-							}
-                            else if (swipeValue < 0)
-							{ 
-								lastSwipe = characterController.SwipeDirection.Down;
-								S = true;
-							}
+					    tempSwipeTimer = swipeTimer;
+					   // float swipeTime = Time.time - startTime;
+					   // float swipeDist = (new Vector3(0, touch.position.y, 0) - new Vector3(0, startPos.y, 0)).magnitude;
 
-                            lastSwipeTime = Time.time;
-                    //   }
-                    }
+					   // if ((swipeTime < maxSwipeTime) && (swipeDist > minSwipeDist))
+					   // {
+					   //	 swipeValue = Mathf.Sign(touch.position.y - startPos.y);
+                       
+					   //	 if (swipeValue > 0)
+					   //	 {
+					   //		 lastSwipe = characterController.SwipeDirection.Up;
+					   //		 W = true;
+					   //		 force = 19.0f * (Mathf.Abs(touch.position.y - startPos.y) / (float)Screen.height);
+					   //	 }
+					   //	 else if (swipeValue < 0)
+					   //	 { 
+					   //		 lastSwipe = characterController.SwipeDirection.Down;
+					   //		 S = true;
+					   //	 }
+
+					   //	 lastSwipeTime = Time.time;
+					   //}
+                    //}
 					//if (couldBeSwipeLeftRight)
 					//{
-						swipeTime = Time.time - startTime;
-						swipeDist = (new Vector3(touch.position.x, 0, 0) - new Vector3(startPos.x, 0, 0)).magnitude;
+						//swipeTime = Time.time - startTime;
+						//swipeDist = (new Vector3(touch.position.x, 0, 0) - new Vector3(startPos.x, 0, 0)).magnitude;
 
-						if ((swipeTime < maxSwipeTime) && (swipeDist > minSwipeDist))
-						{
+						//if ((swipeTime < maxSwipeTime) && (swipeDist > minSwipeDist))
+						//{
 
-							swipeValue = Mathf.Sign(touch.position.x - startPos.x);
+						//	swipeValue = Mathf.Sign(touch.position.x - startPos.x);
 
-							if (swipeValue > 0)
-							{
-								lastSwipe = characterController.SwipeDirection.Right;
-								D = true;
-								movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
-							}
-							else if (swipeValue < 0)
-							{
-								lastSwipe = characterController.SwipeDirection.Left;
-								A = true;
-								movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
-							}
-							lastSwipeTime = Time.time;
-						}
+						//	if (swipeValue > 0)
+						//	{
+						//		lastSwipe = characterController.SwipeDirection.Right;
+						//		D = true;
+						//		movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
+						//	}
+						//	else if (swipeValue < 0)
+						//	{
+						//		lastSwipe = characterController.SwipeDirection.Left;
+						//		A = true;
+						//		movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
+						//	}
+						//	lastSwipeTime = Time.time;
+						//}
 					//}
                     break;
             }
@@ -218,9 +262,9 @@ public class characterController : MonoBehaviour {
 					}
 					airTime--;
 				}
-				W = false;
-			}
 
+			}
+			W = false;
 			if (Input.GetKey(KeyCode.A) || A)
 			{
 				rigidbody2D.AddTorque(groundTorque);
@@ -236,6 +280,7 @@ public class characterController : MonoBehaviour {
 		}
 		else if (Input.GetKey(KeyCode.A) || A)
 		{
+			rigidbody2D.AddTorque(groundTorque);
 			rigidbody2D.AddForce(new Vector2(-movementVelocity, 0), ForceMode2D.Impulse);
 			A = false;
 		}
@@ -246,6 +291,8 @@ public class characterController : MonoBehaviour {
 		}
 		else if (Input.GetKey(KeyCode.D) || D)
 		{
+
+			rigidbody2D.AddTorque(-groundTorque);
 			rigidbody2D.AddForce(new Vector2(+movementVelocity, 0), ForceMode2D.Impulse);
 			D = false;
 		}
