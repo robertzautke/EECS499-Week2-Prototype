@@ -5,6 +5,10 @@ public class cameraController : MonoBehaviour {
 
 	public GameObject Player;
 
+	void Start() {
+		Screen.orientation = ScreenOrientation.Landscape;
+	}
+
 	public static cameraController Instance
 	{
 		get { return instance; }

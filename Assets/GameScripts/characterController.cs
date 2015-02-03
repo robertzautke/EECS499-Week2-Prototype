@@ -20,7 +20,7 @@ public class characterController : MonoBehaviour {
 	public int airTime = 0;
 	public int temp_airTime = 10;
 
-	public int force = 5;
+	public float force = 5.0f;
 	public float airTorque = 1f;
 	public float groundTorque = 5f;
 
@@ -33,10 +33,156 @@ public class characterController : MonoBehaviour {
 	private int starTime;
 	public float angularVelocity;
 
+	public bool W = false;
+	public bool A = false;
+	public bool S = false;
+	public bool D = false;
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+    // Values to set:
+	public float comfortZone = 1000000.0f;
+	public float minSwipeDist = 1.0f;
+	public float maxSwipeTime = 1.0f;
+ 
+    private float startTime;
+    private Vector2 startPos;
+    private bool couldBeSwipeUpDown;
+	private bool couldBeSwipeLeftRight;
+   
+    public enum SwipeDirection {
+        None,
+        Up,
+        Down,
+		Left,
+		Right
+    }
+
+	public SwipeDirection lastSwipe = characterController.SwipeDirection.None;
+	public float lastSwipeTime;
+
+//////////////////////////////////////////////////////////////////////////////////////
+
 	void Update () 
 	{
 
-		//playerPosition = this.gameObject.transform.position;
+/////////////// TouchScreen Handler //////////////////////////////////////////////////
+
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.touches[0];
+       
+            switch (touch.phase)
+            {
+                case TouchPhase.Began:
+                    lastSwipe = characterController.SwipeDirection.None;
+                                        lastSwipeTime = 0;
+                    couldBeSwipeUpDown = true;
+					couldBeSwipeLeftRight = true;
+                    startPos = touch.position;
+                    startTime = Time.time;
+                    break;
+               
+                case TouchPhase.Moved:
+
+					float swipeValue = Mathf.Sign(touch.position.y - startPos.y);
+					if (swipeValue > 0)
+					{
+						lastSwipe = characterController.SwipeDirection.Up;
+						W = true;
+						//force = 19.0f * (Mathf.Abs(touch.position.y - startPos.y) / (float)Screen.height);
+
+					}
+					else if (swipeValue < 0)
+					{
+						lastSwipe = characterController.SwipeDirection.Down;
+						S = true;
+					}
+
+					swipeValue = Mathf.Sign(touch.position.x - startPos.x);
+
+					if (swipeValue > 0)
+					{
+						lastSwipe = characterController.SwipeDirection.Right;
+						D = true;
+						movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
+					}
+					else if (swipeValue < 0)
+					{
+						lastSwipe = characterController.SwipeDirection.Left;
+						A = true;
+						movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
+					}
+
+                    if (Mathf.Abs(touch.position.x - startPos.x) > comfortZone)
+                    {
+                        Debug.Log("Not an UpDown swipe. Swipe strayed " + (int)Mathf.Abs(touch.position.x - startPos.x) +
+                                  "px which is " + (int)(Mathf.Abs(touch.position.x - startPos.x) - comfortZone) +
+                                  "px outside the comfort zone.");
+                        couldBeSwipeUpDown = false;
+                    }
+
+					if (Mathf.Abs(touch.position.y - startPos.y) > comfortZone)
+					{
+						Debug.Log("Not a LeftRight swipe. Swipe strayed " + (int)Mathf.Abs(touch.position.y - startPos.y) +
+								  "px which is " + (int)(Mathf.Abs(touch.position.x - startPos.x) - comfortZone) +
+								  "px outside the comfort zone.");
+						couldBeSwipeLeftRight = false;
+					}
+                    break;
+                case TouchPhase.Ended:
+                   // if (couldBeSwipeUpDown)
+                   // {
+                        float swipeTime = Time.time - startTime;
+                        float swipeDist = (new Vector3(0, touch.position.y, 0) - new Vector3(0, startPos.y, 0)).magnitude;
+                   
+                        if ((swipeTime < maxSwipeTime) && (swipeDist > minSwipeDist))
+                        {
+                            swipeValue = Mathf.Sign(touch.position.y - startPos.y);
+                       
+                            if (swipeValue > 0)
+							{
+								lastSwipe = characterController.SwipeDirection.Up;
+								W = true;
+								force = 19.0f * (Mathf.Abs(touch.position.y - startPos.y) / (float)Screen.height);
+							}
+                            else if (swipeValue < 0)
+							{ 
+								lastSwipe = characterController.SwipeDirection.Down;
+								S = true;
+							}
+
+                            lastSwipeTime = Time.time;
+                    //   }
+                    }
+					//if (couldBeSwipeLeftRight)
+					//{
+						swipeTime = Time.time - startTime;
+						swipeDist = (new Vector3(touch.position.x, 0, 0) - new Vector3(startPos.x, 0, 0)).magnitude;
+
+						if ((swipeTime < maxSwipeTime) && (swipeDist > minSwipeDist))
+						{
+
+							swipeValue = Mathf.Sign(touch.position.x - startPos.x);
+
+							if (swipeValue > 0)
+							{
+								lastSwipe = characterController.SwipeDirection.Right;
+								D = true;
+								movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
+							}
+							else if (swipeValue < 0)
+							{
+								lastSwipe = characterController.SwipeDirection.Left;
+								A = true;
+								movementVelocity = 5.0f * (Mathf.Abs(touch.position.x - startPos.x) / (float)Screen.width);
+							}
+							lastSwipeTime = Time.time;
+						}
+					//}
+                    break;
+            }
+        }
 
 /////////////// Movement Physics/Controls ////////////////////////////////////////////
 
@@ -45,7 +191,7 @@ public class characterController : MonoBehaviour {
 			this.GetComponent<Rigidbody2D>().gravityScale = groundGravity;
 		}
 
-		if (Input.GetKey(KeyCode.W))
+		if (Input.GetKey(KeyCode.W) || W)
 		{
 			if (canJump) 
 			{
@@ -72,39 +218,36 @@ public class characterController : MonoBehaviour {
 					}
 					airTime--;
 				}
+				W = false;
 			}
 
-			if (Input.GetKey(KeyCode.A))
+			if (Input.GetKey(KeyCode.A) || A)
 			{
 				rigidbody2D.AddTorque(groundTorque);
-				rigidbody2D.AddForce(new Vector2(-movementVelocity, 0), ForceMode2D.Force);
-
+				rigidbody2D.AddForce(new Vector2(-movementVelocity, 0), ForceMode2D.Impulse);
+				A = false;
 			}
-			if (Input.GetKey(KeyCode.D))
+			if (Input.GetKey(KeyCode.D) || D)
 			{
 				rigidbody2D.AddTorque(-groundTorque);
-				rigidbody2D.AddForce(new Vector2(+movementVelocity, 0), ForceMode2D.Force);
-
+				rigidbody2D.AddForce(new Vector2(+movementVelocity, 0), ForceMode2D.Impulse);
+				D = false;
 			}
 		}
-		else if (Input.GetKey(KeyCode.A))
+		else if (Input.GetKey(KeyCode.A) || A)
 		{
-			rigidbody2D.AddForce(new Vector2(-movementVelocity, 0), ForceMode2D.Force);
-		
+			rigidbody2D.AddForce(new Vector2(-movementVelocity, 0), ForceMode2D.Impulse);
+			A = false;
 		}
-		else if (Input.GetKey(KeyCode.S))
+		else if (Input.GetKey(KeyCode.S) || S)
 		{
-			rigidbody2D.AddForce(new Vector2(0, -movementVelocity), ForceMode2D.Force);
-
+			rigidbody2D.AddForce(new Vector2(0, -movementVelocity), ForceMode2D.Impulse);
+			S = false;
 		}
-		else if (Input.GetKey(KeyCode.D))
+		else if (Input.GetKey(KeyCode.D) || D)
 		{
-			rigidbody2D.AddForce(new Vector2(+movementVelocity, 0), ForceMode2D.Force);
-
-		}
-		else 
-		{
-	
+			rigidbody2D.AddForce(new Vector2(+movementVelocity, 0), ForceMode2D.Impulse);
+			D = false;
 		}
 
 		if (briefGravityTurnOn > 0)
