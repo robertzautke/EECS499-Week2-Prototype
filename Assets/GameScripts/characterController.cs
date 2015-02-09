@@ -24,7 +24,7 @@ public class characterController : MonoBehaviour {
 	public float airTorque = 1f;
 	public float groundTorque = 5f;
 
-	public int airGravity = 2;
+	public float airGravity = 2;
 	public float groundGravity = 0.65f;
 
 	public int temp_briefGravityTurnOn = 40;
@@ -432,5 +432,25 @@ public class characterController : MonoBehaviour {
                 Application.LoadLevel(currentLevelController.GetComponent<currentLevelController>().currentApplicationLevelName);
             }
         }
+	}
+
+	void OnTriggerEnter2D(Collider2D other)
+	{
+		if (other.gameObject.tag == "Cannon")
+		{
+			this.gameObject.GetComponent<Rigidbody2D>().isKinematic = true;
+			this.gameObject.transform.parent = other.gameObject.transform;
+
+			this.gameObject.transform.localPosition = new Vector3(0f, 0f, 0f);
+			this.gameObject.transform.localRotation = new Quaternion(0f,0f,0f,0f);
+		}
+	}
+
+	void OnCollisionStay2D(Collision2D other)
+	{ 
+		if(other.gameObject.GetComponent<slowZone>() != null)
+		{ 
+			
+		}
 	}
 }

@@ -34,5 +34,10 @@ public class currentLevelController : MonoBehaviour {
         {
             Application.LoadLevel("GameMenu");
         }
+
+		if (Input.GetKeyDown(KeyCode.R))
+		{
+			Application.LoadLevel(currentApplicationLevelName);
+		}
     }
 }
